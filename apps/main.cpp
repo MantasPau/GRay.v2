@@ -5,11 +5,17 @@
 #include <GRay/hittableList.hpp>
 #include <GRay/camera.hpp>
 
-GRay::Math::Color rayColor(const GRay::Math::Ray& ray, const GRay::Math::Hittable& world)
+GRay::Math::Color rayColor(const GRay::Math::Ray& ray, const GRay::Math::Hittable& world, int depth)
 {
+    if (depth <= 0)
+        return {0, 0, 0};
+
     GRay::Math::hitRecord rec;
-    if (world.hit(ray, 0, GRay::Utils::infinity, rec))
-        return 0.5 * (rec.normal + GRay::Math::Color(1, 1, 1));
+    if (world.hit(ray, 0.001, GRay::Utils::infinity, rec))
+    {
+        GRay::Math::Point3 target = rec.p + rec.normal + GRay::Math::randomUnitVector()/*randomInHemisphere(rec.normal)*/;
+        return (0.5 * rayColor(GRay::Math::Ray(rec.p, target - rec.p), world, depth - 1));
+    }
 
     GRay::Math::Vec3 unitDirection = GRay::Math::unitVector(ray.direction());
     double t = 0.5 * (unitDirection.y() + 1.0);
@@ -23,6 +29,7 @@ int main(int argc, char * argv[])
     const int imageWidth = 512;
     const int imageHeight = static_cast<int>(imageWidth / aspectRatio);
     const int samplesPerPixel = 100;
+    const int maxDepth = 50;
 
     //World
     GRay::Math::HittableList world;
@@ -45,7 +52,7 @@ int main(int argc, char * argv[])
                 double u = (i + GRay::Utils::randomDouble()) / (imageWidth - 1);
                 double v = (j + GRay::Utils::randomDouble()) / (imageHeight - 1);
                 GRay::Math::Ray ray = cam.getRay(u, v);
-                pixelColor += rayColor(ray, world);
+                pixelColor += rayColor(ray, world, maxDepth);
             }
             GRay::Color::writeColor(std::cout, pixelColor, samplesPerPixel);
         }

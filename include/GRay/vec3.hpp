@@ -4,6 +4,7 @@
 
 namespace GRay::Math
 {
+    using namespace GRay::Utils;
     class Vec3
     {
         public:
@@ -106,5 +107,39 @@ namespace GRay::Math
     inline Vec3 unitVector(const Vec3& v)
     {
         return v / v.length();
+    }
+
+    inline static Vec3 random()
+    {
+        return Vec3(randomDouble(), randomDouble(), randomDouble());
+    }
+
+    inline static Vec3 random(double min, double max)
+    {
+        return Vec3(randomDouble(min, max), randomDouble(min, max), randomDouble(min, max));
+    }
+
+    inline Vec3 randomInUnitSphere()
+    {
+        while (true)
+        {
+            Vec3 p = random(-1, 1);
+            if (p.lenghtSquared() >= 1) continue;
+            return p;
+        }
+    }
+
+    inline Vec3 randomUnitVector()
+    {
+        return unitVector(randomInUnitSphere());
+    }
+
+    inline Vec3 randomInHemisphere(const Vec3& normal)
+    {
+        Vec3 inUnitSphere = randomInUnitSphere();
+        if (dot(inUnitSphere, normal) > 0.0)
+            return inUnitSphere;
+        else
+            return -inUnitSphere;
     }
 }
