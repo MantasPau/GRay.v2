@@ -40,3 +40,8 @@ namespace GRay::Utils
         return x;
     }
 }
+
+// Common Headers
+
+#include <GRay/ray.hpp>
+#include <GRay/vec3.hpp>

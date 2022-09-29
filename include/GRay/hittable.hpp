@@ -1,6 +1,11 @@
 #pragma once
 
-#include <GRay/ray.hpp>
+#include <GRay/rtweekend.hpp>
+
+namespace GRay
+{
+    class Material;
+}
 
 namespace GRay::Math
 {
@@ -8,6 +13,7 @@ namespace GRay::Math
     {
         Point3 p;
         Vec3 normal;
+        shared_ptr<GRay::Material> mat_ptr;
         double t;
         bool frontFace;
 

@@ -13,8 +13,11 @@ GRay::Math::Color rayColor(const GRay::Math::Ray& ray, const GRay::Math::Hittabl
     GRay::Math::hitRecord rec;
     if (world.hit(ray, 0.001, GRay::Utils::infinity, rec))
     {
-        GRay::Math::Point3 target = rec.p + rec.normal + GRay::Math::randomUnitVector()/*randomInHemisphere(rec.normal)*/;
-        return (0.5 * rayColor(GRay::Math::Ray(rec.p, target - rec.p), world, depth - 1));
+        GRay::Math::Ray scattered;
+        GRay::Math::Color attenuation;
+        if (rec.mat_ptr->scatter(ray, rec, attenuation, scattered))
+            return attenuation * rayColor(scattered, world, depth - 1);
+        return {0, 0, 0};
     }
 
     GRay::Math::Vec3 unitDirection = GRay::Math::unitVector(ray.direction());
@@ -33,8 +36,14 @@ int main(int argc, char * argv[])
 
     //World
     GRay::Math::HittableList world;
-    world.add(make_shared<GRay::Solids::Sphere>(GRay::Math::Point3(0, 0, -1), 0.5));
-    world.add(make_shared<GRay::Solids::Sphere>(GRay::Math::Point3(0, -100.5, -1), 100));
+    auto materialGround = make_shared<GRay::Materials::Lambertian>(GRay::Math::Color(0.8, 0.8, 0.0));
+    auto materialCenter = make_shared<GRay::Materials::Dialectric>(1.5);
+    auto materialLeft = make_shared<GRay::Materials::Dialectric>(1.5);
+    auto materialRight = make_shared<GRay::Materials::Metal>(GRay::Math::Color(0.8, 0.6, 0.2), 1.0);
+    world.add(make_shared<GRay::Solids::Sphere>(GRay::Math::Point3(0, -100.5, -1), 100, materialGround));
+    world.add(make_shared<GRay::Solids::Sphere>(GRay::Math::Point3(0, 0, -1), 0.5, materialCenter));
+    world.add(make_shared<GRay::Solids::Sphere>(GRay::Math::Point3(-1, 0, -1), 0.5, materialLeft));
+    world.add(make_shared<GRay::Solids::Sphere>(GRay::Math::Point3(1, 0, -1), 0.5, materialRight));
 
     //Camera
     GRay::Camera cam;

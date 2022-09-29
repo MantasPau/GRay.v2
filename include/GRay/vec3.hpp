@@ -1,6 +1,7 @@
 #pragma once
 #include <cmath>
 #include <iostream>
+#include <GRay/rtweekend.hpp>
 
 namespace GRay::Math
 {
@@ -50,6 +51,12 @@ namespace GRay::Math
                 return e[0]*e[0] + e[1]*e[1] + e[2]*e[2];
             }
 
+            bool nearZero() const
+            {
+                const double s = 1e-8;
+                return (fabs(e[0]) < s) && (fabs(e[1]) < s) && (fabs(e[2]) < s);
+            }
+
         public:
             double e[3];
     };
@@ -74,7 +81,7 @@ namespace GRay::Math
 
     inline Vec3 operator*(const Vec3& u, const Vec3& v)
     {
-        return Vec3(v.e[0] * u.e[0], v.e[1] * u.e[1], v.e[2] * v.e[2]);
+        return Vec3(v.e[0] * u.e[0], v.e[1] * u.e[1], v.e[2] * u.e[2]);
     }
 
     inline Vec3 operator*(double t, const Vec3& v)
@@ -141,5 +148,18 @@ namespace GRay::Math
             return inUnitSphere;
         else
             return -inUnitSphere;
+    }
+
+    inline Vec3 reflect(const Vec3& v, const Vec3& n)
+    {
+        return v - 2 * dot(v, n) * n;
+    }
+
+    Vec3 refract(const Vec3& uv, const Vec3& n, double etaiOverEtat)
+    {
+        double cosTheta = fmin(dot(-uv, n), 1.0);
+        Vec3 rOutPerp = etaiOverEtat * (uv + cosTheta * n);
+        Vec3 rOutParallel = -sqrt(fabs(1.0 - rOutPerp.lenghtSquared())) * n;
+        return rOutPerp + rOutParallel;
     }
 }

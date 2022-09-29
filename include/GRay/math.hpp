@@ -2,10 +2,7 @@
 
 #include <cmath>
 
-namespace Math
+namespace GRay::Math
 {
-    class vec3
-    {
 
-    };
 }

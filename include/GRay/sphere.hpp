@@ -1,6 +1,7 @@
 #pragma once
 
 #include <GRay/hittable.hpp>
+#include <GRay/material.hpp>
 
 namespace GRay::Solids
 {
@@ -8,12 +9,13 @@ namespace GRay::Solids
     {
     public:
         Sphere() {}
-        Sphere(Math::Point3 cen, double r) : center{cen}, radius{r} {}
+        Sphere(Math::Point3 cen, double r, shared_ptr<GRay::Material> m) : center{cen}, radius{r}, mat_ptr{m} {}
 
         virtual bool hit(const Math::Ray& r, double t_min, double t_max, Math::hitRecord& rec) const override;
     public:
         Math::Point3 center;
         double radius;
+        shared_ptr<GRay::Material> mat_ptr;
     };
 
     bool Sphere::hit(const Math::Ray& r, double t_min, double t_max, Math::hitRecord& rec) const
@@ -39,6 +41,7 @@ namespace GRay::Solids
         rec.p = r.at(rec.t);
         Math::Vec3 outwardNormal = (rec.p - center) / radius;
         rec.setFaceNormal(r, outwardNormal);
+        rec.mat_ptr = mat_ptr;
         return true;
     }
 }
