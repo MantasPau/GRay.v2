@@ -1,6 +1,6 @@
 #pragma once
 
-#include <GRay.v2/vec3.hpp>
+#include <GRay/vec3.hpp>
 
 namespace GRay::Math
 {
