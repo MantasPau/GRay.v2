@@ -9,27 +9,37 @@ namespace GRay
     class Camera
     {
     public:
-        Camera()
+        Camera(Point3 lookFrom, Point3 lookAt, Vec3 vUp, double vfov, double aspectRatio, double apperture, double focusDist)
         {
-            const double aspectRatio = 16.0 / 9.0;
-            double viewportHeight = 2.0;
+            double theta = degreesToRadians(vfov);
+            double h = tan(theta / 2);
+            double viewportHeight = 2.0 * h;
             double viewportWidth = aspectRatio * viewportHeight;
-            double focalLength = 1.0;
+            
+            w = unitVector(lookFrom - lookAt);
+            u = unitVector(cross(vUp, w));
+            v = cross(w, u);
 
-            origin = Point3(0, 0, 0);
-            horizontal = Vec3(viewportWidth, 0, 0);
-            vertical = Vec3(0, viewportHeight, 0);
-            lowerLeftCorner = origin - horizontal / 2 - vertical / 2 - Vec3(0, 0, focalLength);
+            origin = lookFrom;
+            horizontal = focusDist * viewportWidth * u;
+            vertical = focusDist * viewportHeight * v;
+            lowerLeftCorner = origin - horizontal / 2 - vertical / 2 - focusDist * w;
+
+            lensRadius = apperture / 2;
         }
 
-        Ray getRay(double u, double v) const
+        Ray getRay(double s, double t) const
         {
-            return Ray(origin, lowerLeftCorner + u*horizontal + v*vertical - origin);
+            Vec3 rd = lensRadius * randomInUnitDisc();
+            Vec3 offset = u * rd.x() + v * rd.y();
+            return Ray(origin + offset, lowerLeftCorner + s*horizontal + t*vertical - origin - offset);
         }
     private:
         Point3 origin;
         Point3 lowerLeftCorner;
         Vec3 horizontal;
         Vec3 vertical;
+        Vec3 u, v, w;
+        double lensRadius;
     };
 }

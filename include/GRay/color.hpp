@@ -1,7 +1,7 @@
 #pragma once
 #include <GRay/vec3.hpp>
 
-namespace GRay::Color
+namespace GRay::Colors
 {
     void writeColor(std::ostream& out, GRay::Math::Color pixelColor, int samplesPerPixel)
     {

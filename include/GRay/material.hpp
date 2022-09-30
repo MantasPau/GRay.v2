@@ -65,9 +65,9 @@ namespace GRay
                 double cosTheta = fmin(GRay::Math::dot(-unitDirection, rec.normal), 1.0);
                 double sinTheta = sqrt(1.0 - cosTheta * cosTheta);
 
-                bool cannotRefract = refractionRatio * sinTheta > 1;
+                bool cannotRefract = refractionRatio * sinTheta > 1.0;
                 GRay::Math::Vec3 direction;
-                if(cannotRefract)
+                if(cannotRefract || reflectance(cosTheta, refractionRatio) > Utils::randomDouble())
                     direction = GRay::Math::reflect(unitDirection, rec.normal);
                 else
                     direction = GRay::Math::refract(unitDirection, rec.normal, refractionRatio);
@@ -77,6 +77,16 @@ namespace GRay
             }
         public:
             double ir; //Index of refraction
+
+        private:
+            static double reflectance(double consine, double refIdx)
+            {
+                //shlick's approximation for reflectance (fresnell)
+                double r0 = (1 - refIdx) / (1 + refIdx);
+                r0 = r0*r0;
+                double x = 1 - consine;
+                return r0 + (1 - r0) * x*x*x*x*x;
+            }
         };
     }
 }

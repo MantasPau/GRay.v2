@@ -37,16 +37,20 @@ int main(int argc, char * argv[])
     //World
     GRay::Math::HittableList world;
     auto materialGround = make_shared<GRay::Materials::Lambertian>(GRay::Math::Color(0.8, 0.8, 0.0));
-    auto materialCenter = make_shared<GRay::Materials::Dialectric>(1.5);
+    auto materialCenter = make_shared<GRay::Materials::Lambertian>(GRay::Math::Color(0.1, 0.2, 0.5));
     auto materialLeft = make_shared<GRay::Materials::Dialectric>(1.5);
-    auto materialRight = make_shared<GRay::Materials::Metal>(GRay::Math::Color(0.8, 0.6, 0.2), 1.0);
+    auto materialRight = make_shared<GRay::Materials::Metal>(GRay::Math::Color(0.8, 0.6, 0.2), 0.0);
     world.add(make_shared<GRay::Solids::Sphere>(GRay::Math::Point3(0, -100.5, -1), 100, materialGround));
     world.add(make_shared<GRay::Solids::Sphere>(GRay::Math::Point3(0, 0, -1), 0.5, materialCenter));
     world.add(make_shared<GRay::Solids::Sphere>(GRay::Math::Point3(-1, 0, -1), 0.5, materialLeft));
+    world.add(make_shared<GRay::Solids::Sphere>(GRay::Math::Point3(-1, 0, -1), -0.45, materialLeft));
     world.add(make_shared<GRay::Solids::Sphere>(GRay::Math::Point3(1, 0, -1), 0.5, materialRight));
 
     //Camera
-    GRay::Camera cam;
+    GRay::Math::Point3 lookFrom(3, 3, 2);
+    GRay::Math::Point3 lookAt(0, 0, -1);
+    double distToFocus = (lookAt - lookFrom).length();
+    GRay::Camera cam(lookFrom, lookAt, {0, 1, 0}, 20, aspectRatio, 2.0, distToFocus);
     //Render
     std::cout << "P3\n" << imageWidth << ' ' << imageHeight << "\n255\n";
 
@@ -63,7 +67,7 @@ int main(int argc, char * argv[])
                 GRay::Math::Ray ray = cam.getRay(u, v);
                 pixelColor += rayColor(ray, world, maxDepth);
             }
-            GRay::Color::writeColor(std::cout, pixelColor, samplesPerPixel);
+            GRay::Colors::writeColor(std::cout, pixelColor, samplesPerPixel);
         }
     }
 

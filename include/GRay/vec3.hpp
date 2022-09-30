@@ -150,6 +150,16 @@ namespace GRay::Math
             return -inUnitSphere;
     }
 
+    inline Vec3 randomInUnitDisc()
+    {
+        while(true)
+        {
+            Vec3 p = Vec3(randomDouble(-1, 1), randomDouble(-1, 1), 0);
+            if (p.lenghtSquared() >= 1) continue;
+            return p;
+        }
+    }
+
     inline Vec3 reflect(const Vec3& v, const Vec3& n)
     {
         return v - 2 * dot(v, n) * n;
