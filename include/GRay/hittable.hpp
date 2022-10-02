@@ -1,6 +1,7 @@
 #pragma once
 
 #include <GRay/rtweekend.hpp>
+#include <GRay/aabb.h>
 
 namespace GRay
 {
@@ -28,5 +29,6 @@ namespace GRay::Math
     {
     public:
         virtual bool hit(const Ray& r, double t_min, double t_max, hitRecord& rec) const = 0;
+        virtual bool boundingBox(double time0, double time1, GRay::Solids::AABB& outputBox) const = 0;
     };
 }

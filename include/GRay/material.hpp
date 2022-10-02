@@ -28,7 +28,7 @@ namespace GRay
                 GRay::Math::Vec3 scatterDirection = rec.normal + GRay::Math::randomUnitVector();
                 if (scatterDirection.nearZero())
                     scatterDirection = rec.normal;
-                scattered = GRay::Math::Ray(rec.p, scatterDirection);                
+                scattered = GRay::Math::Ray(rec.p, scatterDirection, r_in.time());                
                 attenuation = albedo;
                 return true;
             }
@@ -44,7 +44,7 @@ namespace GRay
             virtual bool scatter(const GRay::Math::Ray& r_in, const GRay::Math::hitRecord& rec, GRay::Math::Color& attenuation, GRay::Math::Ray& scattered) const override
             {
                 GRay::Math::Vec3 reflected = GRay::Math::reflect(GRay::Math::unitVector(r_in.direction()), rec.normal);
-                scattered = GRay::Math::Ray(rec.p, reflected + fuzz * GRay::Math::randomInUnitSphere());
+                scattered = GRay::Math::Ray(rec.p, reflected + fuzz * GRay::Math::randomInUnitSphere(), r_in.time());
                 attenuation = albedo;
                 return (GRay::Math::dot(scattered.direction(), rec.normal) > 0);;
             }
@@ -72,7 +72,7 @@ namespace GRay
                 else
                     direction = GRay::Math::refract(unitDirection, rec.normal, refractionRatio);
 
-                scattered = GRay::Math::Ray(rec.p, direction);
+                scattered = GRay::Math::Ray(rec.p, direction, r_in.time());
                 return true;
             }
         public:

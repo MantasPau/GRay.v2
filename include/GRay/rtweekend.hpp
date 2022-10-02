@@ -39,6 +39,11 @@ namespace GRay::Utils
         if (x > max) return max;
         return x;
     }
+
+    inline int randomInt(int min, int max)
+    {
+        return static_cast<int>(randomDouble(min, max + 1));
+    }
 }
 
 // Common Headers

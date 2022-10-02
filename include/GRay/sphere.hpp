@@ -11,7 +11,8 @@ namespace GRay::Solids
         Sphere() {}
         Sphere(Math::Point3 cen, double r, shared_ptr<GRay::Material> m) : center{cen}, radius{r}, mat_ptr{m} {}
 
-        virtual bool hit(const Math::Ray& r, double t_min, double t_max, Math::hitRecord& rec) const override;
+        bool hit(const Math::Ray& r, double t_min, double t_max, Math::hitRecord& rec) const override;
+        bool boundingBox(double time0, double time1, GRay::Solids::AABB& outputBox) const override;
     public:
         Math::Point3 center;
         double radius;
@@ -42,6 +43,12 @@ namespace GRay::Solids
         Math::Vec3 outwardNormal = (rec.p - center) / radius;
         rec.setFaceNormal(r, outwardNormal);
         rec.mat_ptr = mat_ptr;
+        return true;
+    }
+
+    bool Sphere::boundingBox(double time0, double time1, GRay::Solids::AABB& outputBox) const
+    {
+        outputBox = AABB(center - Math::Vec3(radius, radius, radius), center + Math::Vec3(radius, radius, radius));
         return true;
     }
 }
