@@ -49,7 +49,7 @@ namespace GRay::Math
         for (const auto& object : objects)
         {
             if (!object->boundingBox(time0, time1, tempBox)) return false;
-            outputBox = firstBox ? tempBox : GRay::Solids::suroundingBox(outputBox, tempBox);
+            outputBox = firstBox ? tempBox : GRay::Solids::surroundingBox(outputBox, tempBox);
             firstBox = false;
         }
 

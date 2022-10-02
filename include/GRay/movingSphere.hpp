@@ -58,7 +58,7 @@ namespace GRay::Solids
                   center(_time0) + GRay::Math::Vec3(radius, radius, radius));
         AABB box1(center(_time1) - GRay::Math::Vec3(radius, radius, radius),
                   center(_time1) + GRay::Math::Vec3(radius, radius, radius));
-        outputBox = suroundingBox(box0, box1);
+        outputBox = surroundingBox(box0, box1);
         return true;
     }
 }
