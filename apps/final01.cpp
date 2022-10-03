@@ -4,10 +4,31 @@
 #include <GRay/sphere.hpp>
 #include <GRay/hittableList.hpp>
 #include <GRay/camera.hpp>
+#include <GRay/bvh.h>
 
 using namespace GRay;
 
-Math::Color rayColor(const Math::Ray& ray, const Math::Hittable& world, int depth)
+// Math::Color rayColor(const Math::Ray& ray, const Math::Hittable& world, int depth)
+// {
+//     if (depth <= 0)
+//         return {0, 0, 0};
+
+//     Math::hitRecord rec;
+//     if (world.hit(ray, 0.001, Utils::infinity, rec))
+//     {
+//         Math::Ray scattered;
+//         Math::Color attenuation;
+//         if (rec.mat_ptr->scatter(ray, rec, attenuation, scattered))
+//             return attenuation * rayColor(scattered, world, depth - 1);
+//         return {0, 0, 0};
+//     }
+
+//     Math::Vec3 unitDirection = Math::unitVector(ray.direction());
+//     double t = 0.5 * (unitDirection.y() + 1.0);
+//     return (1.0 - t) * Math::Color(1.0, 1.0, 1.0) + t * Math::Color(0.5, 0.7, 1.0);
+// }
+
+Math::Color rayColor(const Math::Ray& ray, const Solids::BvhNode& world, int depth)
 {
     if (depth <= 0)
         return {0, 0, 0};
@@ -89,6 +110,8 @@ int main(int argc, char * argv[])
 
     //World
     auto  world = randomScene();
+
+    GRay::Solids::BvhNode bvhTree(world, 0, 0);
     
     //Camera
     Math::Point3 lookFrom(13, 2, 3);
@@ -109,7 +132,7 @@ int main(int argc, char * argv[])
                 double u = (i + Utils::randomDouble()) / (imageWidth - 1);
                 double v = (j + Utils::randomDouble()) / (imageHeight - 1);
                 Math::Ray ray = cam.getRay(u, v);
-                pixelColor += rayColor(ray, world, maxDepth);
+                pixelColor += rayColor(ray, bvhTree/*world*/, maxDepth);
             }
             Colors::writeColor(std::cout, pixelColor, samplesPerPixel);
         }

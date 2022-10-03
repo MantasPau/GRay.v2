@@ -40,6 +40,31 @@ namespace GRay::Solids
         return hitLeft || hitRight;
     }
 
+    inline bool boxComapre(const shared_ptr<GRay::Math::Hittable> a, const shared_ptr<GRay::Math::Hittable> b, int axis)
+    {
+        AABB boxA;
+        AABB boxB;
+
+        if (!a->boundingBox(0, 0, boxA) || !b->boundingBox(0, 0, boxB))
+            std::cerr << "No bounding box in  bvhNode constructor";
+        return boxA.min().e[axis] < boxB.min().e[axis];
+    }
+
+    bool boxXCompare(const shared_ptr<GRay::Math::Hittable> a, const shared_ptr<GRay::Math::Hittable> b)
+    {
+        return boxComapre(a, b, 0);
+    }
+
+    bool boxYCompare(const shared_ptr<GRay::Math::Hittable> a, const shared_ptr<GRay::Math::Hittable> b)
+    {
+        return boxComapre(a, b, 1);
+    }
+
+    bool boxZCompare(const shared_ptr<GRay::Math::Hittable> a, const shared_ptr<GRay::Math::Hittable> b)
+    {
+        return boxComapre(a, b, 2);
+    }
+
     BvhNode::BvhNode(const std::vector<shared_ptr<GRay::Math::Hittable> >& srcObjects, size_t start, size_t end, double time0, double time1)
     {
         auto objects = srcObjects;
@@ -77,30 +102,5 @@ namespace GRay::Solids
         if (!left->boundingBox(time0, time1, boxLeft) || !right->boundingBox(time0, time1, boxRight))
             std::cerr << "No bounding box in BvhNode constructor.\n";
         box = surroundingBox(boxLeft, boxRight);
-    }
-
-    inline bool boxComapre(const shared_ptr<GRay::Math::Hittable> a, const shared_ptr<GRay::Math::Hittable> b, int axis)
-    {
-        AABB boxA;
-        AABB boxB;
-
-        if (!a->boundingBox(0, 0, boxA) || !b->boundingBox(0, 0, boxB))
-            std::cerr << "No bounding box in  bvhNode constructor";
-        return boxA.min().e[axis] < boxB.min().e[axis];
-    }
-
-    bool boxXCompare(const shared_ptr<GRay::Math::Hittable> a, const shared_ptr<GRay::Math::Hittable> b)
-    {
-        return boxComapre(a, b, 0);
-    }
-
-    bool boxYCompare(const shared_ptr<GRay::Math::Hittable> a, const shared_ptr<GRay::Math::Hittable> b)
-    {
-        return boxComapre(a, b, 1);
-    }
-
-    bool boxZCompare(const shared_ptr<GRay::Math::Hittable> a, const shared_ptr<GRay::Math::Hittable> b)
-    {
-        return boxComapre(a, b, 2);
     }
 }

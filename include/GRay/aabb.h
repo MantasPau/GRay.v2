@@ -15,8 +15,8 @@ namespace GRay::Solids
         Math::Point3 min() const {return minimum;}
         Math::Point3 max() const {return maximum;}
 
-        bool hit(const Math::Ray& r, double t_min, double t_max) const
-        {
+        bool hit(const Math::Ray& r, double t_min, double t_max) const;
+        /*{
             for (int a = 0; a < 3; ++a)
             {
                 auto t0 = fmin((minimum[a] - r.origin()[a]) / r.direction()[a],
@@ -29,7 +29,7 @@ namespace GRay::Solids
                     return false;
             }
             return true;
-        }
+        }*/
     public:
         Math::Point3 minimum;
         Math::Point3 maximum;
