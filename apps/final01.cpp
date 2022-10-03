@@ -8,26 +8,6 @@
 
 using namespace GRay;
 
-// Math::Color rayColor(const Math::Ray& ray, const Math::Hittable& world, int depth)
-// {
-//     if (depth <= 0)
-//         return {0, 0, 0};
-
-//     Math::hitRecord rec;
-//     if (world.hit(ray, 0.001, Utils::infinity, rec))
-//     {
-//         Math::Ray scattered;
-//         Math::Color attenuation;
-//         if (rec.mat_ptr->scatter(ray, rec, attenuation, scattered))
-//             return attenuation * rayColor(scattered, world, depth - 1);
-//         return {0, 0, 0};
-//     }
-
-//     Math::Vec3 unitDirection = Math::unitVector(ray.direction());
-//     double t = 0.5 * (unitDirection.y() + 1.0);
-//     return (1.0 - t) * Math::Color(1.0, 1.0, 1.0) + t * Math::Color(0.5, 0.7, 1.0);
-// }
-
 Math::Color rayColor(const Math::Ray& ray, const Solids::BvhNode& world, int depth)
 {
     if (depth <= 0)
@@ -46,6 +26,28 @@ Math::Color rayColor(const Math::Ray& ray, const Solids::BvhNode& world, int dep
     Math::Vec3 unitDirection = Math::unitVector(ray.direction());
     double t = 0.5 * (unitDirection.y() + 1.0);
     return (1.0 - t) * Math::Color(1.0, 1.0, 1.0) + t * Math::Color(0.5, 0.7, 1.0);
+}
+
+Math::HittableList twoSpheres()
+{
+    Math::HittableList objects;
+    auto checker = make_shared<Materials::CheckerTexture>(Math::Color(0.2, 0.3, 0.1), Math::Color(0.9, 0.9, 0.9));
+
+    objects.add(make_shared<Solids::Sphere>(Math::Point3(0, -10, 0), 10, make_shared<Materials::Lambertian>(checker)));
+    objects.add(make_shared<Solids::Sphere>(Math::Point3(0, 10, 0), 10, make_shared<Materials::Lambertian>(checker)));
+
+    return objects;
+}
+
+Math::HittableList twoPerlinSpheres()
+{
+    Math::HittableList objects;
+    auto pertext = make_shared<Materials::NoiseTexture>(4);
+
+    objects.add(make_shared<Solids::Sphere>(Math::Point3(0, -1000, 0), 1000, make_shared<Materials::Lambertian>(pertext)));
+    objects.add(make_shared<Solids::Sphere>(Math::Point3(0, 2, 0), 2, make_shared<Materials::Lambertian>(pertext)));
+
+    return objects;
 }
 
 Math::HittableList randomScene()
@@ -106,19 +108,43 @@ int main(int argc, char * argv[])
     const double aspectRatio = 3.0 / 2.0;
     const int imageWidth = 512;
     const int imageHeight = static_cast<int>(imageWidth / aspectRatio);
-    const int samplesPerPixel = 1000;
+    const int samplesPerPixel = 100;
     const int maxDepth = 50;
 
     //World
-    auto  world = randomScene();
-
-    GRay::Solids::BvhNode bvhTree(world, 0, 0);
-    
+    Math::HittableList world;
     //Camera
     Math::Point3 lookFrom(13, 2, 3);
     Math::Point3 lookAt(0, 0, 0);
     double distToFocus = 10;
-    Camera cam(lookFrom, lookAt, {0, 1, 0}, 20, aspectRatio, 0.1, distToFocus);
+    double vfov = 40.0;
+    double aperture = 0.0;
+
+    switch(3)
+    {
+        case 1:
+            world = randomScene();
+            lookFrom = Math::Point3(13, 2, 3);
+            lookAt = Math::Point3(0, 0, 0);
+            vfov = 20.0;
+            aperture = 0.1;
+            break;
+        case 2:
+            world = twoSpheres();
+            lookFrom = Math::Point3(13, 2, 3);
+            lookAt = Math::Point3(0, 0, 0);
+            vfov = 20.0;
+            break;
+        case 3:
+            world = twoPerlinSpheres();
+            lookFrom = Math::Point3(13, 2, 3);
+            lookAt = Math::Point3(0, 0, 0);
+            vfov = 20.0;
+            break;
+    }
+
+    GRay::Solids::BvhNode bvhTree(world, 0, 0);
+    Camera cam(lookFrom, lookAt, {0, 1, 0}, vfov, aspectRatio, aperture, distToFocus);
     //Render
     std::cout << "P3\n" << imageWidth << ' ' << imageHeight << "\n255\n";
 
