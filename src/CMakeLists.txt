@@ -1,3 +1,9 @@
+#FetchContent_Declare(
+#    stb
+#    GIT_REPOSITORY https://github.com/nothings/stb.git
+#)
+#FetchContent_MakeAvailable(stb)
+
 set(HEADER_LIST "${GRay_SOURCE_DIR}/include/GRay/math.hpp")
 
 add_library(GRayV2Lib math.cpp)

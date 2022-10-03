@@ -2,6 +2,8 @@
 
 #include <GRay/rtweekend.hpp>
 #include <GRay/perlin.hpp>
+#include <iostream>
+#include <stb/rtw_stb_image.hpp>
 
 namespace GRay::Materials
 {
@@ -56,5 +58,54 @@ namespace GRay::Materials
     public:
         Perlin noise;
         double scale;
+    };
+
+    class ImageTexture : public Texture
+    {
+    public:
+        const static int bytesPerPixel = 3;
+
+        ImageTexture() : data{nullptr}, width{0}, height{0}, bytesPerScanline{0} {}
+        ImageTexture(const char* fileName) 
+        {
+            auto componentsPerPixel = bytesPerPixel;
+            data = stbi_load(fileName, &width, &height, &componentsPerPixel, componentsPerPixel);
+            if (!data)
+            {
+                std::cerr << "ERROR: Could not load texture image file '" << fileName << "'.\n";
+                width = height = 0;
+            }
+            bytesPerScanline = bytesPerPixel * width;
+        }
+
+        ~ImageTexture()
+        {
+            delete data;
+        }
+
+        GRay::Math::Color value(double u, double v, const GRay::Math::Point3& p) const override
+        {
+            if (data == nullptr)
+                return Math::Color(0, 1, 1);
+
+            u = Utils::clamp(u, 0.0, 1.0);
+            v = 1.0 - Utils::clamp(v, 0.0, 1.0);
+
+            int i = static_cast<int>(u*width);
+            int j = static_cast<int>(v*height);
+
+            if (i >= width) i = width - 1;
+            if (j >= height) j = height - 1;
+
+            const auto colorScale = 1.0 / 255;
+            auto pixel = data + j*bytesPerScanline + i*bytesPerPixel;
+
+            return Math::Color(colorScale * pixel[0], colorScale * pixel[1], colorScale * pixel[2]);
+        }
+
+    private:
+        unsigned char* data;
+        int width, height;
+        int bytesPerScanline;
     };
 }

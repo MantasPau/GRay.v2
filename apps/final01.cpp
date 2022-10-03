@@ -50,6 +50,18 @@ Math::HittableList twoPerlinSpheres()
     return objects;
 }
 
+Math::HittableList twoSpheresEarth()
+{
+    Math::HittableList objects;
+    auto checker = make_shared<Materials::CheckerTexture>(Math::Color(0.2, 0.3, 0.1), Math::Color(0.9, 0.9, 0.9));
+    auto earthTexture = make_shared<Materials::ImageTexture>("data/earthmap.jpg");
+
+    objects.add(make_shared<Solids::Sphere>(Math::Point3(0, -1000, 0), 1000, make_shared<Materials::Lambertian>(checker)));
+    objects.add(make_shared<Solids::Sphere>(Math::Point3(0, 1, 0), 1, make_shared<Materials::Lambertian>(earthTexture)));
+
+    return objects;
+}
+
 Math::HittableList randomScene()
 {
     HittableList world;
@@ -120,7 +132,7 @@ int main(int argc, char * argv[])
     double vfov = 40.0;
     double aperture = 0.0;
 
-    switch(3)
+    switch(4)
     {
         case 1:
             world = randomScene();
@@ -137,6 +149,12 @@ int main(int argc, char * argv[])
             break;
         case 3:
             world = twoPerlinSpheres();
+            lookFrom = Math::Point3(13, 2, 3);
+            lookAt = Math::Point3(0, 0, 0);
+            vfov = 20.0;
+            break;
+        case 4:
+            world = twoSpheresEarth();
             lookFrom = Math::Point3(13, 2, 3);
             lookAt = Math::Point3(0, 0, 0);
             vfov = 20.0;

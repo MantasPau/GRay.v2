@@ -10,15 +10,9 @@ if (CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
     set_property(GLOBAL PROPERTY USE_FOLDERS ON)
     include(CTest)
 
-    find_package(Doxygen)
-    if(doxygen_FOUND)
-        message(STATUS "Doxygen found, would build docs here")#add_subdirectory(docs)
-    else()
-        message(STATUS "Doxygen not found, not building docs")
-    endif()
-endif()
+ endif()
 
-include(FetchContent)
+#include(FetchContent)
 
 #set(CMAKE_CXX_FLAGS "-Wall -Wextra") #Enable before publishing
 set(CMAKE_CXX_FLAGS_RELEASE "-O3")
