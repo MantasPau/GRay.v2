@@ -4,6 +4,7 @@
 #include <GRay/math.hpp>
 #include <GRay/ray.hpp>
 #include <GRay/hittable.hpp>
+#include <GRay/texture.hpp>
 
 namespace GRay
 {
@@ -22,18 +23,19 @@ namespace GRay
         class Lambertian : public Material
         {
         public:
-            Lambertian(const GRay::Math::Color& a) : albedo(a) {}
+            Lambertian(const GRay::Math::Color& a) : albedo{make_shared<SolidColor>(a)} {}
+            Lambertian(shared_ptr<Texture> a) : albedo{a} {}
             virtual bool scatter(const GRay::Math::Ray& r_in, const GRay::Math::hitRecord& rec, GRay::Math::Color& attenuation, GRay::Math::Ray& scattered) const override
             {
                 GRay::Math::Vec3 scatterDirection = rec.normal + GRay::Math::randomUnitVector();
                 if (scatterDirection.nearZero())
                     scatterDirection = rec.normal;
                 scattered = GRay::Math::Ray(rec.p, scatterDirection, r_in.time());                
-                attenuation = albedo;
+                attenuation = albedo->value(rec.u, rec.v, rec.p);
                 return true;
             }
         public:
-            GRay::Math::Color albedo;
+            shared_ptr<Texture> albedo;
         };
 
         class Metal : public Material

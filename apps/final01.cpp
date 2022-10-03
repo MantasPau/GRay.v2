@@ -51,7 +51,8 @@ Math::Color rayColor(const Math::Ray& ray, const Solids::BvhNode& world, int dep
 Math::HittableList randomScene()
 {
     HittableList world;
-    auto groundMaterial = make_shared<Materials::Lambertian>(Math::Color(0.5, 0.5, 0.5));
+    auto checker = make_shared<Materials::CheckerTexture>(Math::Color(0.2, 0.3, 0.1), Math::Color(0.9, 0.9, 0.9));
+    auto groundMaterial = make_shared<Materials::Lambertian>(checker);
     world.add(make_shared<Solids::Sphere>(Math::Point3(0, -1000, 0), 1000, groundMaterial));
     for (int a = -11; a < 11; ++a)
     {

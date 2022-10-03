@@ -16,6 +16,8 @@ namespace GRay::Math
         Vec3 normal;
         shared_ptr<GRay::Material> mat_ptr;
         double t;
+        double u;
+        double v;
         bool frontFace;
 
         inline void setFaceNormal(const Ray& r, const Vec3& outwardNormal)
