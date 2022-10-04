@@ -5,17 +5,18 @@
 #include <GRay/hittableList.hpp>
 #include <GRay/camera.hpp>
 #include <GRay/bvh.h>
+#include <GRay/background.hpp>
 
 using namespace GRay;
 
-Math::Color rayColor(const Math::Ray& ray, const Math::Color& background, const Solids::BvhNode& world, int depth)
+Math::Color rayColor(const Math::Ray& ray, const Solids::Background& background, const Solids::BvhNode& world, int depth)
 {
     if (depth <= 0)
         return {0, 0, 0};
 
     Math::hitRecord rec;
     if (!world.hit(ray, 0.001, Utils::infinity, rec))
-        return background;
+        return background.getValue(ray);
     
     Math::Ray scattered;
     Math::Color attenuation;
@@ -119,7 +120,7 @@ int main(int argc, char * argv[])
     const double aspectRatio = 3.0 / 2.0;
     const int imageWidth = 512;
     const int imageHeight = static_cast<int>(imageWidth / aspectRatio);
-    const int samplesPerPixel = 100;
+    const int samplesPerPixel = 1000;
     const int maxDepth = 50;
 
     //World
@@ -130,13 +131,13 @@ int main(int argc, char * argv[])
     double distToFocus = 10;
     double vfov = 40.0;
     double aperture = 0.0;
-    Math::Color background(0, 0, 0);
+    Solids::Background background(make_shared<Materials::ImageTexture>("data/clarens_midday_4k.hdr"));
 
-    switch(5)
+    switch(1)
     {
         case 1:
             world = randomScene();
-            background = Math::Color(0.7, 0.8, 1.0);
+            //background = Solids::Background(Math::Color(0.7, 0.8, 1.0));
             lookFrom = Math::Point3(13, 2, 3);
             lookAt = Math::Point3(0, 0, 0);
             vfov = 20.0;
@@ -144,28 +145,28 @@ int main(int argc, char * argv[])
             break;
         case 2:
             world = twoSpheres();
-            background = Math::Color(0.7, 0.8, 1.0);
+            background = Solids::Background(Math::Color(0.7, 0.8, 1.0));
             lookFrom = Math::Point3(13, 2, 3);
             lookAt = Math::Point3(0, 0, 0);
             vfov = 20.0;
             break;
         case 3:
             world = twoPerlinSpheres();
-            background = Math::Color(0.7, 0.8, 1.0);
+            background = Solids::Background(Math::Color(0.7, 0.8, 1.0));
             lookFrom = Math::Point3(13, 2, 3);
             lookAt = Math::Point3(0, 0, 0);
             vfov = 20.0;
             break;
         case 4:
             world = twoSpheresEarth();
-            background = Math::Color(0.7, 0.8, 1.0);
+            background = Solids::Background(Math::Color(0.7, 0.8, 1.0));
             lookFrom = Math::Point3(13, 2, 3);
             lookAt = Math::Point3(0, 0, 0);
             vfov = 20.0;
             break;
         default:
         case 5:
-            background = Math::Color(0.0, 0.0, 0.0);
+            background = Solids::Background(Math::Color(0.0, 0.0, 0.0));
             break;
     }
 
