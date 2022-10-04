@@ -8,24 +8,23 @@
 
 using namespace GRay;
 
-Math::Color rayColor(const Math::Ray& ray, const Solids::BvhNode& world, int depth)
+Math::Color rayColor(const Math::Ray& ray, const Math::Color& background, const Solids::BvhNode& world, int depth)
 {
     if (depth <= 0)
         return {0, 0, 0};
 
     Math::hitRecord rec;
-    if (world.hit(ray, 0.001, Utils::infinity, rec))
-    {
-        Math::Ray scattered;
-        Math::Color attenuation;
-        if (rec.mat_ptr->scatter(ray, rec, attenuation, scattered))
-            return attenuation * rayColor(scattered, world, depth - 1);
-        return {0, 0, 0};
-    }
+    if (!world.hit(ray, 0.001, Utils::infinity, rec))
+        return background;
+    
+    Math::Ray scattered;
+    Math::Color attenuation;
+    Math::Color emited = rec.mat_ptr->emitted(rec.u, rec.v, rec.p);
 
-    Math::Vec3 unitDirection = Math::unitVector(ray.direction());
-    double t = 0.5 * (unitDirection.y() + 1.0);
-    return (1.0 - t) * Math::Color(1.0, 1.0, 1.0) + t * Math::Color(0.5, 0.7, 1.0);
+    if (!rec.mat_ptr->scatter(ray, rec, attenuation, scattered))
+        return emited;
+
+    return emited + attenuation * rayColor(scattered, background, world, depth - 1);
 }
 
 Math::HittableList twoSpheres()
@@ -131,11 +130,13 @@ int main(int argc, char * argv[])
     double distToFocus = 10;
     double vfov = 40.0;
     double aperture = 0.0;
+    Math::Color background(0, 0, 0);
 
-    switch(4)
+    switch(5)
     {
         case 1:
             world = randomScene();
+            background = Math::Color(0.7, 0.8, 1.0);
             lookFrom = Math::Point3(13, 2, 3);
             lookAt = Math::Point3(0, 0, 0);
             vfov = 20.0;
@@ -143,21 +144,28 @@ int main(int argc, char * argv[])
             break;
         case 2:
             world = twoSpheres();
+            background = Math::Color(0.7, 0.8, 1.0);
             lookFrom = Math::Point3(13, 2, 3);
             lookAt = Math::Point3(0, 0, 0);
             vfov = 20.0;
             break;
         case 3:
             world = twoPerlinSpheres();
+            background = Math::Color(0.7, 0.8, 1.0);
             lookFrom = Math::Point3(13, 2, 3);
             lookAt = Math::Point3(0, 0, 0);
             vfov = 20.0;
             break;
         case 4:
             world = twoSpheresEarth();
+            background = Math::Color(0.7, 0.8, 1.0);
             lookFrom = Math::Point3(13, 2, 3);
             lookAt = Math::Point3(0, 0, 0);
             vfov = 20.0;
+            break;
+        default:
+        case 5:
+            background = Math::Color(0.0, 0.0, 0.0);
             break;
     }
 
@@ -177,7 +185,7 @@ int main(int argc, char * argv[])
                 double u = (i + Utils::randomDouble()) / (imageWidth - 1);
                 double v = (j + Utils::randomDouble()) / (imageHeight - 1);
                 Math::Ray ray = cam.getRay(u, v);
-                pixelColor += rayColor(ray, bvhTree/*world*/, maxDepth);
+                pixelColor += rayColor(ray, background, bvhTree/*world*/, maxDepth);
             }
             Colors::writeColor(std::cout, pixelColor, samplesPerPixel);
         }

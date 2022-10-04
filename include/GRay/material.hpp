@@ -16,6 +16,7 @@ namespace GRay
     {
     public:
         virtual bool scatter(const Math::Ray& r_in, const Math::hitRecord& rec, Math::Color& attenuation, Math::Ray& scattered) const = 0;
+        virtual Math::Color emitted(double u, double v, const Math::Point3& p) const {return Math::Color(0, 0, 0);}
     };
 
     namespace Materials
@@ -25,7 +26,7 @@ namespace GRay
         public:
             Lambertian(const GRay::Math::Color& a) : albedo{make_shared<SolidColor>(a)} {}
             Lambertian(shared_ptr<Texture> a) : albedo{a} {}
-            virtual bool scatter(const GRay::Math::Ray& r_in, const GRay::Math::hitRecord& rec, GRay::Math::Color& attenuation, GRay::Math::Ray& scattered) const override
+            bool scatter(const GRay::Math::Ray& r_in, const GRay::Math::hitRecord& rec, GRay::Math::Color& attenuation, GRay::Math::Ray& scattered) const override
             {
                 GRay::Math::Vec3 scatterDirection = rec.normal + GRay::Math::randomUnitVector();
                 if (scatterDirection.nearZero())
@@ -43,7 +44,7 @@ namespace GRay
         public:
             Metal(const GRay::Math::Color& a, double f) : albedo{a}, fuzz{f} {}
 
-            virtual bool scatter(const GRay::Math::Ray& r_in, const GRay::Math::hitRecord& rec, GRay::Math::Color& attenuation, GRay::Math::Ray& scattered) const override
+            bool scatter(const GRay::Math::Ray& r_in, const GRay::Math::hitRecord& rec, GRay::Math::Color& attenuation, GRay::Math::Ray& scattered) const override
             {
                 GRay::Math::Vec3 reflected = GRay::Math::reflect(GRay::Math::unitVector(r_in.direction()), rec.normal);
                 scattered = GRay::Math::Ray(rec.p, reflected + fuzz * GRay::Math::randomInUnitSphere(), r_in.time());
@@ -59,7 +60,7 @@ namespace GRay
         {
         public:
             Dialectric(double indexOfRefraction) : ir{indexOfRefraction} {}
-            virtual bool scatter(const GRay::Math::Ray& r_in, const GRay::Math::hitRecord& rec, GRay::Math::Color& attenuation, GRay::Math::Ray& scattered) const override
+            bool scatter(const GRay::Math::Ray& r_in, const GRay::Math::hitRecord& rec, GRay::Math::Color& attenuation, GRay::Math::Ray& scattered) const override
             {
                 attenuation = GRay::Math::Color(1.0, 1.0, 1.0);
                 double refractionRatio = rec.frontFace ? (1.0 / ir) : ir;
@@ -89,6 +90,25 @@ namespace GRay
                 double x = 1 - consine;
                 return r0 + (1 - r0) * x*x*x*x*x;
             }
+        };
+
+        class DiffuseLight : public Material
+        {
+        public:
+            DiffuseLight(shared_ptr<Texture> a) : emit{a} {}
+            DiffuseLight(Math::Color c) : emit{make_shared<SolidColor>(c)} {}
+
+            bool scatter(const GRay::Math::Ray& r_in, const GRay::Math::hitRecord& rec, GRay::Math::Color& attenuation, GRay::Math::Ray& scattered) const override
+            {
+                return false;                
+            }
+
+            Math::Color emitted(double u, double v, const Math::Point3& p) const override
+            {
+                return emit->value(u, v, p);
+            }
+        public:
+            shared_ptr<Texture> emit;
         };
     }
 }

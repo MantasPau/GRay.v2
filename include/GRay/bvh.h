@@ -73,7 +73,12 @@ namespace GRay::Solids
 
         size_t objectSpan = end - start;
 
-        if (objectSpan == 1)
+        if (objectSpan == 0)
+        {
+            left = right = nullptr;
+            return;
+        }
+        else if (objectSpan == 1)
         {
             left = right = objects[start];
         }
