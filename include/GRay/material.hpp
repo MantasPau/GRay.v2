@@ -95,8 +95,8 @@ namespace GRay
         class DiffuseLight : public Material
         {
         public:
-            DiffuseLight(shared_ptr<Texture> a) : emit{a} {}
-            DiffuseLight(Math::Color c) : emit{make_shared<SolidColor>(c)} {}
+            DiffuseLight(shared_ptr<Texture> a, double att = 1.0) : emit{a}, attenuation{att} {}
+            DiffuseLight(Math::Color c, double att = 1.0) : emit{make_shared<SolidColor>(c)}, attenuation{att} {}
 
             bool scatter(const GRay::Math::Ray& r_in, const GRay::Math::hitRecord& rec, GRay::Math::Color& attenuation, GRay::Math::Ray& scattered) const override
             {
@@ -105,10 +105,11 @@ namespace GRay
 
             Math::Color emitted(double u, double v, const Math::Point3& p) const override
             {
-                return emit->value(u, v, p);
+                return attenuation * emit->value(u, v, p);
             }
         public:
             shared_ptr<Texture> emit;
+            double attenuation;
         };
     }
 }

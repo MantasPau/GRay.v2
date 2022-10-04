@@ -131,7 +131,8 @@ int main(int argc, char * argv[])
     double distToFocus = 10;
     double vfov = 40.0;
     double aperture = 0.0;
-    Solids::Background background(make_shared<Materials::ImageTexture>("data/clarens_midday_4k.hdr"));
+    Solids::Background background(make_shared<Materials::ImageTextureHDRI>("data/clarens_midday_4k.hdr"), 0.5);
+    //std::static_pointer_cast<Materials::ImageTextureHDRI>(std::static_pointer_cast<Materials::DiffuseLight>(background.mat_ptr)->emit)->subSampling = true;
 
     switch(1)
     {

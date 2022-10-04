@@ -108,4 +108,93 @@ namespace GRay::Materials
         int width, height;
         int bytesPerScanline;
     };
+
+    class ImageTextureHDRI : public Texture
+    {
+    public:
+        const static int partsPerPixel = 3;
+        bool subSampling;
+        double subSamplingRadius;
+        double subSamplingRaysCnt;
+        bool useClamping;
+        double remapingFactor;
+
+        ImageTextureHDRI() : data{nullptr}, width{0}, height{0}, partsPerScanline{0}, 
+                             subSampling{false}, subSamplingRadius{0.01}, subSamplingRaysCnt{100},
+                             useClamping{false}, remapingFactor{1/2.2} {}
+        ImageTextureHDRI(const char* fileName) 
+        {
+            auto componentsPerPixel = partsPerPixel;
+            data = stbi_loadf(fileName, &width, &height, &componentsPerPixel, componentsPerPixel);
+            if (!data)
+            {
+                std::cerr << "ERROR: Could not load texture image file '" << fileName << "'.\n";
+                width = height = 0;
+            }
+            partsPerScanline = partsPerPixel * width;
+            subSampling = false;
+            subSamplingRadius = 0.01;
+            subSamplingRaysCnt = 100;
+            useClamping = false;
+            remapingFactor = 1/2.2;
+        }
+
+        ~ImageTextureHDRI()
+        {
+            delete data;
+        }
+
+        GRay::Math::Color value(double u, double v, const GRay::Math::Point3& p) const override
+        {
+            if (data == nullptr)
+                return Math::Color(0, 1, 1);
+
+            u = Utils::clamp(u, 0.0, 1.0);
+            v = 1.0 - Utils::clamp(v, 0.0, 1.0);
+
+            Math::Color res;
+            if (subSampling)
+            {
+                for (int k = 0; k < subSamplingRaysCnt; k++)
+                {
+                    Math::Vec3 vv = Math::randomInUnitDisc() * subSamplingRadius;
+                    vv[0] += u;
+                    vv[1] += v;
+                    if (vv[0] < 0) vv[0] += 1;
+                    if (vv[1] < 0) vv[1] += 1;
+                    if (vv[0] > 1) vv[0] -= 1;
+                    if (vv[1] > 1) vv[1] -= 1;
+                    
+                    int i = static_cast<int>(vv[0]*width);
+                    int j = static_cast<int>(vv[1]*height);
+
+                    if (i >= width) i = width - 1;
+                    if (j >= height) j = height - 1;
+
+                    //std::cerr << i << " " << j << "\n";
+                    auto pixel = data + j*partsPerScanline + i*partsPerPixel;
+                    res += Math::Color(pixel[0], pixel[1], pixel[2]);    
+                }
+                res /= subSamplingRaysCnt;
+            }
+            else
+            {
+                int i = static_cast<int>(u*width);
+                int j = static_cast<int>(v*height);
+                if (i >= width) i = width - 1;
+                if (j >= height) j = height - 1;
+                auto pixel = data + j*partsPerScanline + i*partsPerPixel;
+                if (useClamping)
+                    res = Math::Color(pow(pixel[0], remapingFactor), pow(pixel[1], remapingFactor), pow(pixel[2], remapingFactor));
+                else
+                    res = Math::Color(pixel[0], pixel[1], pixel[2]);
+            }
+            return res;
+        }
+
+    private:
+        float* data;
+        int width, height;
+        int partsPerScanline;
+    };
 }

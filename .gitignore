@@ -4,6 +4,7 @@ build/
 
 # Ignore images
 *.ppm
+*.hdr
 
 # Prerequisites
 *.d

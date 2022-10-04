@@ -10,8 +10,8 @@ namespace GRay::Solids
     class Background
     {
     public:
-        Background(Math::Color c) : mat_ptr{make_shared<Materials::DiffuseLight>(c)} {}
-        Background(shared_ptr<Materials::Texture> t) : mat_ptr{make_shared<Materials::DiffuseLight>(t)} {}
+        Background(Math::Color c, double att = 1.0) : mat_ptr{make_shared<Materials::DiffuseLight>(c, att)} {}
+        Background(shared_ptr<Materials::Texture> t, double att = 1.0) : mat_ptr{make_shared<Materials::DiffuseLight>(t, att)} {}
 
         Math::Color getValue(const Math::Ray& ray) const
         {
