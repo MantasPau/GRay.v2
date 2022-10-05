@@ -111,5 +111,20 @@ namespace GRay
             shared_ptr<Texture> emit;
             double attenuation;
         };
+
+        class Isotropic : public Material
+        {
+        public:
+            Isotropic(Math::Color c) : albedo{make_shared<SolidColor>(c)} {}
+            Isotropic(shared_ptr<Texture> t) : albedo{t} {}
+            bool scatter(const GRay::Math::Ray& r_in, const GRay::Math::hitRecord& rec, GRay::Math::Color& attenuation, GRay::Math::Ray& scattered) const override
+            {
+                scattered = Math::Ray(rec.p, Math::randomInUnitSphere(), r_in.time());
+                attenuation = albedo->value(rec.u, rec.v, rec.p);
+                return true;
+            }
+        public:
+            shared_ptr<Texture> albedo;
+        };
     }
 }

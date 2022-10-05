@@ -20,7 +20,6 @@ namespace GRay::Materials
         ~Perlin()
         {
             delete[] ranVec;
-            delete[] ranFloat;
             delete[] permX;
             delete[] permY;
             delete[] permZ;
@@ -65,7 +64,6 @@ namespace GRay::Materials
     private:
         static const int pointCount = 256;
         Math::Vec3* ranVec;
-        double* ranFloat;
         int* permX;
         int* permY;
         int* permZ;

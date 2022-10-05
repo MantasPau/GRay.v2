@@ -2,12 +2,14 @@
 #include <GRay/rtweekend.hpp>
 #include <GRay/color.hpp>
 #include <GRay/sphere.hpp>
+#include <GRay/movingSphere.hpp>
 #include <GRay/hittableList.hpp>
 #include <GRay/camera.hpp>
 #include <GRay/bvh.h>
 #include <GRay/background.hpp>
 #include <GRay/aarect.hpp>
 #include <GRay/box.hpp>
+#include <GRay/constantMedium.hpp>
 
 using namespace GRay;
 
@@ -106,6 +108,34 @@ Math::HittableList cornelBox()
     return objects;
 }
 
+Math::HittableList cornelBoxSmoke()
+{
+    Math::HittableList objects;
+    auto red = make_shared<Materials::Lambertian>(Math::Color(0.65, 0.05, 0.05));
+    auto white = make_shared<Materials::Lambertian>(Math::Color(0.73, 0.73, 0.73));
+    auto green = make_shared<Materials::Lambertian>(Math::Color(0.12, 0.45, 0.15));
+    auto light = make_shared<Materials::DiffuseLight>(Math::Color(7, 7, 7));
+
+    objects.add(make_shared<Solids::YZRect>(0, 555, 0, 555, 555, green));
+    objects.add(make_shared<Solids::YZRect>(0, 555, 0, 555, 0, red));
+    objects.add(make_shared<Solids::XZRect>(113, 443, 127, 432, 554, light));
+    objects.add(make_shared<Solids::XZRect>(0, 555, 0, 555, 0, white));
+    objects.add(make_shared<Solids::XZRect>(0, 555, 0, 555, 555, white));
+    objects.add(make_shared<Solids::XYRect>(0, 555, 0, 555, 555, white));
+
+    shared_ptr<Math::Hittable> box1 = make_shared<Solids::Box>(Math::Point3(0, 0, 0), Math::Point3(165, 330, 165), white);
+    shared_ptr<Math::Hittable> box2 = make_shared<Solids::Box>(Math::Point3(0, 0, 0), Math::Point3(165, 165, 165), white);
+    box1 = make_shared<Math::RotateY>(box1, 15);
+    box1 = make_shared<Math::Translate>(box1, Math::Vec3(265, 0, 295));
+    box2 = make_shared<Math::RotateY>(box2, -18);
+    box2 = make_shared<Math::Translate>(box2, Math::Vec3(130, 0, 65));
+
+    objects.add(make_shared<Solids::ConstantMedium>(box1, 0.01, Math::Color(0, 0, 0)));
+    objects.add(make_shared<Solids::ConstantMedium>(box2, 0.01, Math::Color(1, 1, 1)));
+
+    return objects;
+}
+
 Math::HittableList randomScene()
 {
     HittableList world;
@@ -158,6 +188,63 @@ Math::HittableList randomScene()
     return world;
 }
 
+Math::HittableList finalScene02()
+{
+    Math::HittableList boxes1;
+    auto ground = make_shared<Materials::Lambertian>(Math::Color(0.48, 0.83, 0.53));
+
+    const int boxesPerSide = 20;
+    for (int i = 0; i < boxesPerSide; ++i)
+        for (int j = 0; j < boxesPerSide; ++j)
+        {
+            auto w = 100.0;
+            auto x0 = -1000.0 + i*w;
+            auto z0 = -1000.0 + j*w;
+            auto y0 = 0.0;
+            auto x1 = x0 + w;
+            auto z1 = z0 + w;
+            auto y1 = Math::randomDouble(1,101);
+            boxes1.add(make_shared<Solids::Box>(Math::Point3(x0, y0, z0), Math::Point3(x1, y1, z1), ground));
+        }
+
+    Math::HittableList objects;
+    objects.add(make_shared<Solids::BvhNode>(boxes1, 0, 1));
+
+    auto light = make_shared<Materials::DiffuseLight>(Math::Color(7, 7, 7));
+    objects.add(make_shared<Solids::XZRect>(123, 423, 247, 412, 554, light));
+
+    auto center1 = Math::Point3(400, 400, 200);
+    auto center2 = center1 + Math::Vec3(30, 0, 0);
+    auto movingSphereMaterial = make_shared<Materials::Lambertian>(Math::Color(0.7, 0.3, 0.1));
+    objects.add(make_shared<Solids::MovingSphere>(center1, center2, 0, 1, 50, movingSphereMaterial));
+
+    objects.add(make_shared<Solids::Sphere>(Math::Point3(260, 150, 45), 50, make_shared<Materials::Dialectric>(1.5)));
+    objects.add(make_shared<Solids::Sphere>(Math::Point3(0, 150, 145), 50, make_shared<Materials::Metal>(Math::Color(0.8, 0.8, 0.9), 0.4)));
+
+    auto boundary = make_shared<Solids::Sphere>(Math::Point3(360, 150, 145), 70, make_shared<Materials::Dialectric>(1.5));
+    objects.add(boundary);
+    objects.add(make_shared<Solids::ConstantMedium>(boundary, 0.2, Math::Color(0.2, 0.4, 0.9)));
+    boundary = make_shared<Solids::Sphere>(Math::Point3(0, 0, 0), 5000, make_shared<Materials::Dialectric>(1.5));
+    objects.add(make_shared<Solids::ConstantMedium>(boundary, 0.0001, Math::Color(1, 1, 1)));
+
+    auto emat = make_shared<Materials::Lambertian>(make_shared<Materials::ImageTexture>("data/earthmap.jpg"));
+    objects.add(make_shared<Solids::Sphere>(Math::Point3(400, 200, 400), 100, emat));
+    auto pertext = make_shared<Materials::NoiseTexture>(1);
+    objects.add(make_shared<Solids::Sphere>(Math::Point3(220, 280, 300), 80, make_shared<Materials::Lambertian>(pertext)));
+
+    Math::HittableList boxes2;
+    auto white = make_shared<Materials::Lambertian>(Math::Color(0.73, 0.73, 0.73));
+    int ns = 1000;
+    for (int j = 0; j < ns; ++j)
+        boxes2.add(make_shared<Solids::Sphere>(Math::Point3(Math::randomDouble(0, 165), 
+                                                            Math::randomDouble(0, 165), 
+                                                            Math::randomDouble(0, 165)), 
+                                                            10, white));
+
+    objects.add(make_shared<Math::Translate>(make_shared<Math::RotateY>(make_shared<Solids::BvhNode>(boxes2, 0.0, 1.0), 15), Math::Vec3(-100, 270, 395)));
+    return objects;
+}
+
 int main(int argc, char * argv[])
 {
     //Image
@@ -178,7 +265,7 @@ int main(int argc, char * argv[])
     Solids::Background background(Math::Color(0.7, 0.8, 1.0));
     //std::static_pointer_cast<Materials::ImageTextureHDRI>(std::static_pointer_cast<Materials::DiffuseLight>(background.mat_ptr)->emit)->subSampling = true;
 
-    switch(6)
+    switch(8)
     {
         case 1:
             world = randomScene();
@@ -228,8 +315,29 @@ int main(int argc, char * argv[])
             lookAt = Math::Point3(278, 278, 0);
             vfov = 40.0;
             break;
-        default:
         case 7:
+            world = cornelBoxSmoke();
+            background = Solids::Background(Math::Color(0.0, 0.0, 0.0));
+            aspectRatio = 1;
+            imageWidth = 600;
+            imageHeight = imageWidth;
+            samplesPerPixel = 2000;
+            lookFrom = Math::Point3(278, 278, -800);
+            lookAt = Math::Point3(278, 278, 0);
+            vfov = 40.0;
+            break;
+        case 8:
+            world = finalScene02();
+            background = Solids::Background(Math::Color(0.0, 0.0, 0.0));
+            aspectRatio = 1;
+            imageWidth = 600;
+            imageHeight = imageWidth;
+            samplesPerPixel = 10;
+            lookFrom = Math::Point3(478, 278, -600);
+            lookAt = Math::Point3(278, 278, 0);
+            vfov = 40.0;
+            break;
+        default:
             background = Solids::Background(Math::Color(0.0, 0.0, 0.0));
             break;
     }
@@ -250,6 +358,7 @@ int main(int argc, char * argv[])
                 double u = (i + Utils::randomDouble()) / (imageWidth - 1);
                 double v = (j + Utils::randomDouble()) / (imageHeight - 1);
                 Math::Ray ray = cam.getRay(u, v);
+                ray.tm = Math::randomDouble();
                 pixelColor += rayColor(ray, background, bvhTree/*world*/, maxDepth);
             }
             Colors::writeColor(std::cout, pixelColor, samplesPerPixel);
