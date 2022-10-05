@@ -6,6 +6,8 @@
 #include <GRay/camera.hpp>
 #include <GRay/bvh.h>
 #include <GRay/background.hpp>
+#include <GRay/aarect.hpp>
+#include <GRay/box.hpp>
 
 using namespace GRay;
 
@@ -58,6 +60,48 @@ Math::HittableList twoSpheresEarth()
 
     objects.add(make_shared<Solids::Sphere>(Math::Point3(0, -1000, 0), 1000, make_shared<Materials::Lambertian>(checker)));
     objects.add(make_shared<Solids::Sphere>(Math::Point3(0, 1, 0), 1, make_shared<Materials::Lambertian>(earthTexture)));
+
+    return objects;
+}
+
+Math::HittableList simpleLight()
+{
+    Math::HittableList objects;
+    auto pertext = make_shared<Materials::NoiseTexture>(4);
+
+    objects.add(make_shared<Solids::Sphere>(Math::Point3(0, -1000, 0), 1000, make_shared<Materials::Lambertian>(pertext)));
+    objects.add(make_shared<Solids::Sphere>(Math::Point3(0, 2, 0), 2, make_shared<Materials::Lambertian>(pertext)));
+
+    auto diffLight = make_shared<Materials::DiffuseLight>(Math::Color(4, 4, 4), 2);
+    objects.add(make_shared<Solids::XYRect>(3, 5, 1, 3, -2, diffLight));
+    objects.add(make_shared<Solids::Sphere>(Math::Point3(0, 6, 0), 1, diffLight));
+
+    return objects;
+}
+
+Math::HittableList cornelBox()
+{
+    Math::HittableList objects;
+    auto red = make_shared<Materials::Lambertian>(Math::Color(0.6, 0.05, 0.05));
+    auto white = make_shared<Materials::Lambertian>(Math::Color(0.73, 0.73, 0.73));
+    auto green = make_shared<Materials::Lambertian>(Math::Color(0.12, 0.45, 0.15));
+    auto light = make_shared<Materials::DiffuseLight>(Math::Color(15, 15, 15));
+
+    objects.add(make_shared<Solids::YZRect>(0, 555, 0, 555, 555, green));
+    objects.add(make_shared<Solids::YZRect>(0, 555, 0, 555, 0, red));
+    objects.add(make_shared<Solids::XZRect>(213, 343, 227, 332, 554, light));
+    objects.add(make_shared<Solids::XZRect>(0, 555, 0, 555, 0, white));
+    objects.add(make_shared<Solids::XZRect>(0, 555, 0, 555, 555, white));
+    objects.add(make_shared<Solids::XYRect>(0, 555, 0, 555, 555, white));
+
+    shared_ptr<Math::Hittable> box1 = make_shared<Solids::Box>(Math::Point3(0, 0, 0), Math::Point3(165, 330, 165), white);
+    shared_ptr<Math::Hittable> box2 = make_shared<Solids::Box>(Math::Point3(0, 0, 0), Math::Point3(165, 165, 165), white);
+    box1 = make_shared<Math::RotateY>(box1, 15);
+    box1 = make_shared<Math::Translate>(box1, Math::Vec3(265, 0, 295));
+    objects.add(box1);
+    box2 = make_shared<Math::RotateY>(box2, -18);
+    box2 = make_shared<Math::Translate>(box2, Math::Vec3(130, 0, 65));
+    objects.add(box2);
 
     return objects;
 }
@@ -117,11 +161,11 @@ Math::HittableList randomScene()
 int main(int argc, char * argv[])
 {
     //Image
-    const double aspectRatio = 3.0 / 2.0;
-    const int imageWidth = 512;
-    const int imageHeight = static_cast<int>(imageWidth / aspectRatio);
-    const int samplesPerPixel = 1000;
-    const int maxDepth = 50;
+    double aspectRatio = 3.0 / 2.0;
+    int imageWidth = 512;
+    int imageHeight = static_cast<int>(imageWidth / aspectRatio);
+    int samplesPerPixel = 10;
+    int maxDepth = 50;
 
     //World
     Math::HittableList world;
@@ -131,14 +175,14 @@ int main(int argc, char * argv[])
     double distToFocus = 10;
     double vfov = 40.0;
     double aperture = 0.0;
-    Solids::Background background(make_shared<Materials::ImageTextureHDRI>("data/clarens_midday_4k.hdr"), 0.5);
+    Solids::Background background(Math::Color(0.7, 0.8, 1.0));
     //std::static_pointer_cast<Materials::ImageTextureHDRI>(std::static_pointer_cast<Materials::DiffuseLight>(background.mat_ptr)->emit)->subSampling = true;
 
-    switch(1)
+    switch(6)
     {
         case 1:
             world = randomScene();
-            //background = Solids::Background(Math::Color(0.7, 0.8, 1.0));
+            background = Solids::Background(make_shared<Materials::ImageTextureHDRI>("data/clarens_midday_4k.hdr"), 0.5);
             lookFrom = Math::Point3(13, 2, 3);
             lookAt = Math::Point3(0, 0, 0);
             vfov = 20.0;
@@ -165,8 +209,27 @@ int main(int argc, char * argv[])
             lookAt = Math::Point3(0, 0, 0);
             vfov = 20.0;
             break;
-        default:
         case 5:
+            world = simpleLight();
+            background = Solids::Background(Math::Color(0.0, 0.0, 0.0));
+            samplesPerPixel = 10;
+            lookFrom = Math::Point3(26, 3, 6);
+            lookAt = Math::Point3(0, 2, 0);
+            vfov = 20.0;
+            break;
+        case 6:
+            world = cornelBox();
+            background = Solids::Background(Math::Color(0.0, 0.0, 0.0));
+            aspectRatio = 1;
+            imageWidth = 600;
+            imageHeight = imageWidth;
+            samplesPerPixel = 100;
+            lookFrom = Math::Point3(278, 278, -800);
+            lookAt = Math::Point3(278, 278, 0);
+            vfov = 40.0;
+            break;
+        default:
+        case 7:
             background = Solids::Background(Math::Color(0.0, 0.0, 0.0));
             break;
     }
