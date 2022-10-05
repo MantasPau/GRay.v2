@@ -7,4 +7,4 @@ Render using bounding volume accelaration structure:
 
 Latest render with suport for HDRI images:
 
-![out](https://user-images.githubusercontent.com/26069433/193783195-d7f859fa-ecdf-4e8b-9788-99fb3bfeb210.jpg)
+https://user-images.githubusercontent.com/26069433/193995137-fcd67486-9831-4482-bcee-2797b9970032.mp4
