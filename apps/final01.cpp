@@ -120,7 +120,7 @@ int main(int argc, char * argv[])
     const double aspectRatio = 3.0 / 2.0;
     const int imageWidth = 512;
     const int imageHeight = static_cast<int>(imageWidth / aspectRatio);
-    const int samplesPerPixel = 1000;
+    const int samplesPerPixel = 100;
     const int maxDepth = 50;
 
     //World
@@ -131,7 +131,7 @@ int main(int argc, char * argv[])
     double distToFocus = 10;
     double vfov = 40.0;
     double aperture = 0.0;
-    Solids::Background background(make_shared<Materials::ImageTextureHDRI>("data/clarens_midday_4k.hdr"), 0.5);
+    Solids::Background background(make_shared<Materials::ImageTextureHDRI>("data/htl_free_001.hdr"), 2);
     //std::static_pointer_cast<Materials::ImageTextureHDRI>(std::static_pointer_cast<Materials::DiffuseLight>(background.mat_ptr)->emit)->subSampling = true;
 
     switch(1)
