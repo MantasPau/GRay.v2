@@ -52,8 +52,8 @@ namespace GRay::Materials
         GRay::Math::Color value(double u, double v, const GRay::Math::Point3& p) const override 
         {
             //return GRay::Math::Color(1, 1, 1) * 0.5 * (1.0 + noise.noise(scale * p)); //simple
-            //return GRay::Math::Color(1, 1, 1) * noise.turb(scale * p); //turbulence
-            return GRay::Math::Color(1, 1, 1) * 0.5 * (1 + sin(scale * p.z() + 10 * noise.turb(p))); //marble
+            return GRay::Math::Color(1, 1, 1) * noise.turb(scale * p); //turbulence
+            //return GRay::Math::Color(1, 1, 1) * 0.5 * (1 + sin(scale * p.z() + 10 * noise.turb(p))); //marble
         }
     public:
         Perlin noise;

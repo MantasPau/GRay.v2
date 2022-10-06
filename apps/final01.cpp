@@ -1,4 +1,5 @@
 #include <iostream>
+#include <chrono>
 #include <GRay/rtweekend.hpp>
 #include <GRay/color.hpp>
 #include <GRay/sphere.hpp>
@@ -10,6 +11,7 @@
 #include <GRay/aarect.hpp>
 #include <GRay/box.hpp>
 #include <GRay/constantMedium.hpp>
+
 
 using namespace GRay;
 
@@ -211,7 +213,7 @@ Math::HittableList finalScene02()
     objects.add(make_shared<Solids::BvhNode>(boxes1, 0, 1));
 
     auto light = make_shared<Materials::DiffuseLight>(Math::Color(7, 7, 7));
-    objects.add(make_shared<Solids::XZRect>(123, 423, 247, 412, 554, light));
+    objects.add(make_shared<Solids::XZRect>(123, 423, 147, 412, 554, light));
 
     auto center1 = Math::Point3(400, 400, 200);
     auto center2 = center1 + Math::Vec3(30, 0, 0);
@@ -229,7 +231,7 @@ Math::HittableList finalScene02()
 
     auto emat = make_shared<Materials::Lambertian>(make_shared<Materials::ImageTexture>("data/earthmap.jpg"));
     objects.add(make_shared<Solids::Sphere>(Math::Point3(400, 200, 400), 100, emat));
-    auto pertext = make_shared<Materials::NoiseTexture>(1);
+    auto pertext = make_shared<Materials::NoiseTexture>(0.05);
     objects.add(make_shared<Solids::Sphere>(Math::Point3(220, 280, 300), 80, make_shared<Materials::Lambertian>(pertext)));
 
     Math::HittableList boxes2;
@@ -332,7 +334,7 @@ int main(int argc, char * argv[])
             aspectRatio = 1;
             imageWidth = 600;
             imageHeight = imageWidth;
-            samplesPerPixel = 10;
+            samplesPerPixel = 10000;
             lookFrom = Math::Point3(478, 278, -600);
             lookAt = Math::Point3(278, 278, 0);
             vfov = 40.0;
@@ -342,14 +344,14 @@ int main(int argc, char * argv[])
             break;
     }
 
-    GRay::Solids::BvhNode bvhTree(world, 0, 0);
+    GRay::Solids::BvhNode bvhTree(world, 0, 1);
     Camera cam(lookFrom, lookAt, {0, 1, 0}, vfov, aspectRatio, aperture, distToFocus);
     //Render
     std::cout << "P3\n" << imageWidth << ' ' << imageHeight << "\n255\n";
 
     for (int j = imageHeight - 1; j >= 0; --j)
     {
-        std::cerr << "\rScanlines remaining: " << j << ' ' << std::flush;
+        std::cerr << "\rScanlines remaining: " << j << std::flush;
         for (int i = 0; i < imageWidth; i++)
         {
             Math::Color pixelColor(0, 0, 0);

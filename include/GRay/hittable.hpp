@@ -129,10 +129,10 @@ namespace GRay::Math
         auto p = rec.p;
         auto normal = rec.normal;
         
-        p[0] = cosTheta * rec.p[0] - sinTheta * rec.p[2];
-        p[2] = sinTheta * rec.p[0] + cosTheta * rec.p[2];
-        normal[0] = cosTheta * rec.normal[0] - sinTheta * rec.normal[2];
-        normal[2] = sinTheta * rec.normal[0] + cosTheta * rec.normal[2];
+        p[0] = cosTheta * rec.p[0] + sinTheta * rec.p[2];
+        p[2] = -sinTheta * rec.p[0] + cosTheta * rec.p[2];
+        normal[0] = cosTheta * rec.normal[0] + sinTheta * rec.normal[2];
+        normal[2] = -sinTheta * rec.normal[0] + cosTheta * rec.normal[2];
 
         rec.p = p;
         rec.setFaceNormal(rotatedRay, normal);
