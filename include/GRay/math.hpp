@@ -2,7 +2,10 @@
 
 #include <cmath>
 
-namespace GRay::Math
+namespace GRay
 {
+	namespace Math
+	{
 
+	}
 }

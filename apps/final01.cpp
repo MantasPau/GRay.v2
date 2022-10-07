@@ -334,7 +334,7 @@ int main(int argc, char * argv[])
             aspectRatio = 1;
             imageWidth = 600;
             imageHeight = imageWidth;
-            samplesPerPixel = 10000;
+            samplesPerPixel = 100;
             lookFrom = Math::Point3(478, 278, -600);
             lookAt = Math::Point3(278, 278, 0);
             vfov = 40.0;
@@ -351,7 +351,7 @@ int main(int argc, char * argv[])
 
     for (int j = imageHeight - 1; j >= 0; --j)
     {
-        std::cerr << "\rScanlines remaining: " << j << std::flush;
+        std::cerr << "\rScanlines remaining: " << j << "   " << std::flush;
         for (int i = 0; i < imageWidth; i++)
         {
             Math::Color pixelColor(0, 0, 0);

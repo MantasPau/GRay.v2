@@ -5,54 +5,57 @@
 #include <memory>
 #include <vector>
 
-namespace GRay::Math
+namespace GRay
 {
-    class HittableList : public Hittable
+    namespace Math
     {
-    public:
-        HittableList() {}
-        HittableList(std::shared_ptr<Hittable> object) {add(object);}
-
-        void clear() {objects.clear();}
-        void add(std::shared_ptr<Hittable> object) {objects.push_back(object);}
-        bool hit(const Ray& r, double t_min, double t_max, hitRecord& rec) const override;
-        bool boundingBox(double time0, double time1, GRay::Solids::AABB& outputBox) const override;
-    public:
-        std::vector<std::shared_ptr<Hittable> > objects;
-    };
-
-    bool HittableList::hit(const Ray& r, double t_min, double t_max, hitRecord& rec) const
-    {
-        hitRecord tmpRec;
-        bool hitAnything = false;
-        double closestHitSoFar = t_max;
-
-        for (const std::shared_ptr<Hittable>& object : objects)
+        class HittableList : public Hittable
         {
-            if (object->hit(r, t_min, closestHitSoFar, tmpRec))
+        public:
+            HittableList() {}
+            HittableList(std::shared_ptr<Hittable> object) { add(object); }
+
+            void clear() { objects.clear(); }
+            void add(std::shared_ptr<Hittable> object) { objects.push_back(object); }
+            bool hit(const Ray& r, double t_min, double t_max, hitRecord& rec) const override;
+            bool boundingBox(double time0, double time1, GRay::Solids::AABB& outputBox) const override;
+        public:
+            std::vector<std::shared_ptr<Hittable> > objects;
+        };
+
+        bool HittableList::hit(const Ray& r, double t_min, double t_max, hitRecord& rec) const
+        {
+            hitRecord tmpRec;
+            bool hitAnything = false;
+            double closestHitSoFar = t_max;
+
+            for (const std::shared_ptr<Hittable>& object : objects)
             {
-                hitAnything = true;
-                closestHitSoFar = tmpRec.t;
-                rec = tmpRec;
+                if (object->hit(r, t_min, closestHitSoFar, tmpRec))
+                {
+                    hitAnything = true;
+                    closestHitSoFar = tmpRec.t;
+                    rec = tmpRec;
+                }
             }
+            return hitAnything;
         }
-        return hitAnything;
-    }
 
-    bool HittableList::boundingBox(double time0, double time1, GRay::Solids::AABB& outputBox) const
-    {
-        if (objects.empty()) return false;
-
-        GRay::Solids::AABB tempBox;
-        bool firstBox = true;
-
-        for (const auto& object : objects)
+        bool HittableList::boundingBox(double time0, double time1, GRay::Solids::AABB& outputBox) const
         {
-            if (!object->boundingBox(time0, time1, tempBox)) return false;
-            outputBox = firstBox ? tempBox : GRay::Solids::surroundingBox(outputBox, tempBox);
-            firstBox = false;
-        }
+            if (objects.empty()) return false;
 
-        return true;
+            GRay::Solids::AABB tempBox;
+            bool firstBox = true;
+
+            for (const auto& object : objects)
+            {
+                if (!object->boundingBox(time0, time1, tempBox)) return false;
+                outputBox = firstBox ? tempBox : GRay::Solids::surroundingBox(outputBox, tempBox);
+                firstBox = false;
+            }
+
+            return true;
+        }
     }
 }
