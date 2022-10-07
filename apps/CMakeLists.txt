@@ -9,3 +9,7 @@ target_link_libraries(GRayFinal01 PRIVATE GRayV2Lib)
 add_executable(GRayFinal02 final02.cpp)
 target_compile_features(GRayFinal02 PRIVATE cxx_std_11)
 target_link_libraries(GRayFinal02 PRIVATE GRayV2Lib)
+
+add_executable(GRayBalls balls.cpp)
+target_compile_features(GRayBalls PRIVATE cxx_std_11)
+target_link_libraries(GRayBalls PRIVATE GRayV2Lib)
